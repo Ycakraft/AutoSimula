@@ -1,0 +1,459 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+/* ===== VARIÁVEIS CSS (CUSTOM PROPERTIES) ===== */
+:root {
+    --ferrari-red: #ff2800;
+    --ferrari-black: #000000;
+    --ferrari-white: #ffffff;
+    --ferrari-gray: #d9d9d9;
+    --ferrari-dark: #1a1a1a;
+    --transition: all 0.3s ease;
+}
+
+/* ===== RESET E CONFIGURAÇÕES GERAIS ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    background-color: var(--ferrari-black);
+    color: var(--ferrari-white);
+    line-height: 1.6;
+    overflow-x: hidden;
+    font-weight: 400;
+}
+
+/* ===== TIPOGRAFIA ===== */
+h1, h2, h3, h4, h5 {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* ===== LAYOUT E CONTAINERS ===== */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.page {
+    display: none;
+    min-height: 100vh;
+}
+
+.page.active {
+    display: block;
+}
+
+.full-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== HEADER E NAVEGAÇÃO (MANTIDO) ===== */
+header {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1200px;
+    min-width: 600px;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    background-color: rgba(121, 121, 121, 0.434);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--ferrari-red);
+    text-transform: uppercase;
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: var(--ferrari-white);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    position: relative;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.nav-links a:hover {
+    color: var(--ferrari-white);
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--ferrari-red);
+    transition: var(--transition);
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+/* Estilos de HERO, QUESTIONNAIRE e RESULTS removidos */
+
+/* ===== SEÇÃO PADRÃO (USADA NO ABOUT) ===== */
+.section-title {
+    text-align: center;
+    margin-bottom: 80px;
+    position: relative;
+}
+
+.section-title h2 {
+    font-size: 2.8rem;
+    color: var(--ferrari-white);
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-title p {
+    color: var(--ferrari-gray);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: var(--ferrari-red);
+    border-radius: 2px;
+}
+
+/* ===== ABOUT PAGE (COMPLETO) ===== */
+.about {
+    background: linear-gradient(rgba(10, 10, 10, 0.95), rgba(20, 20, 20, 0.98));
+    padding: 100px 0;
+}
+
+.about-hero {
+    padding: 200px 0 100px; /* Adiciona padding para evitar o header fixo */
+    text-align: center;
+}
+
+.about-hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    color: var(--ferrari-red);
+}
+
+.about-hero .lead {
+    font-size: 1.3rem;
+    color: var(--ferrari-gray);
+}
+
+.about-mission {
+    max-width: 800px;
+    margin: 60px auto;
+    text-align: center;
+    padding: 40px;
+    background-color: rgba(30, 30, 30, 0.7);
+    border-radius: 16px;
+    border: 1px solid rgba(100, 100, 100, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.about-mission h3 {
+    color: var(--ferrari-white);
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.about-mission p {
+    color: var(--ferrari-gray);
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.team-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: center;
+    margin-top: 60px;
+}
+
+.team-member {
+    width: 280px;
+    text-align: center;
+    background-color: rgba(30, 30, 30, 0.7);
+    border-radius: 16px;
+    padding: 30px 25px;
+    transition: var(--transition);
+    border: 1px solid rgba(100, 100, 100, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.team-member:hover {
+    transform: translateY(-8px);
+    border-color: var(--ferrari-red);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.member-photo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    margin: 0 auto 25px;
+    border: 3px solid var(--ferrari-gray);
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+    /* Adiciona estilo de fallback para ícone */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-member:hover .member-photo {
+    border-color: var(--ferrari-white);
+}
+
+/* Corrigido para garantir que o ícone do Font Awesome funcione como fallback para a imagem */
+.member-photo i {
+    font-size: 80px; 
+    line-height: 160px; 
+    color: var(--ferrari-gray);
+    transition: color 0.3s ease;
+}
+
+.team-member:hover .member-photo i {
+    color: var(--ferrari-white);
+}
+
+.member-name {
+    color: var(--ferrari-white);
+    margin-bottom: 12px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.member-role {
+    color: var(--ferrari-gray);
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.member-role::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: var(--ferrari-gray);
+}
+
+.member-description {
+    color: var(--ferrari-gray);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-top: 15px;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(100, 100, 100, 0.3);
+    color: var(--ferrari-white);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.social-links a:hover {
+    background: var(--ferrari-red);
+    color: var(--ferrari-white);
+    transform: translateY(-3px);
+}
+
+
+/* Estilos de FOOTER removidos */
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    header {
+        min-width: unset;
+        width: 95%;
+        padding: 1rem;
+    }
+    
+    .nav-links {
+        gap: 15px;
+    }
+    
+    .logo-text {
+        font-size: 1.4rem;
+    }
+    
+    .section-title h2 {
+        font-size: 2.2rem;
+    }
+
+    .about-hero {
+        padding: 150px 0 50px;
+    }
+    
+    .about-hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .team-container {
+        gap: 20px;
+    }
+
+    .team-member {
+        width: 100%;
+        max-width: 350px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<main class="container">
+    <section class="about-hero">
+        <div class="container">
+            <h1>Simulação Inteligente de Veículos</h1> 
+            <p class="lead">Nossa equipe especializada em análise financeira e dados do mercado automotivo</p>
+        </div>
+    </section>
+
+    <section id="about" class="page active"> 
+        <div class="full-screen about">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Nossa Equipe</h2>
+                    <p>Conheça nossa missão, visão e equipe especializada</p>
+                </div>
+
+                <div class="about-mission">
+                    <h3>Nossa Missão</h3>
+                    <p>Oferecer simulações precisas e transparentes para auxiliar nossos clientes na tomada de decisão
+                        sobre troca de veículos, utilizando tecnologia avançada e dados em tempo real do mercado
+                        automotivo.</p>
+                </div>
+
+                <div class="team-container">
+                    <div class="team-member">
+                        <div class="member-photo">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h4 class="member-name">Ycaro Campovilla</h4>
+                        <p class="member-role">Especialista Financeiro</p>
+                        <p class="member-description">Especialista em análise financeira com mais de 10 anos de
+                            experiência no mercado automotivo.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="member-photo">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h4 class="member-name">Enzo</h4>
+                        <p class="member-role">Analista de Dados</p>
+                        <p class="member-description">Especialista em big data e análise de tendências do mercado
+                            automotivo.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-medium"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="member-photo">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h4 class="member-name">Enrico</h4>
+                        <p class="member-role">Consultor Automotivo</p>
+                        <p class="member-description">Consultor especializado em avaliação de veículos e negociação.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% endblock %}

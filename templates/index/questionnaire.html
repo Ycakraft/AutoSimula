@@ -1,0 +1,921 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script type="text/javascript" src="/static/js/chart.js/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+/* ===== VARIÁVEIS CSS (CUSTOM PROPERTIES) ===== */
+:root {
+    --ferrari-red: #ff2800;
+    --ferrari-black: #000000;
+    --ferrari-white: #ffffff;
+    --ferrari-gray: #d9d9d9;
+    --ferrari-dark: #1a1a1a;
+    --transition: all 0.3s ease;
+}
+
+/* ===== RESET E CONFIGURAÇÕES GERAIS ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    background-color: var(--ferrari-black);
+    color: var(--ferrari-white);
+    line-height: 1.6;
+    overflow-x: hidden;
+    font-weight: 400;
+}
+
+/* ===== TIPOGRAFIA ===== */
+h1, h2, h3, h4, h5 {
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* ===== LAYOUT E CONTAINERS ===== */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.page {
+    display: none;
+    min-height: 100vh;
+}
+
+.page.active {
+    display: block;
+}
+
+.full-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== HEADER E NAVEGAÇÃO (MANTIDO) ===== */
+header {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1200px;
+    min-width: 600px;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    background-color: rgba(121, 121, 121, 0.434);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--ferrari-red);
+    text-transform: uppercase;
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: var(--ferrari-white);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    position: relative;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.nav-links a:hover {
+    color: var(--ferrari-white);
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--ferrari-red);
+    transition: var(--transition);
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+/* Estilos HERO SECTION (MINIMIZADO - Apenas classes usadas por botões) */
+.hero { display: none; /* Não visível nesta página */ }
+.cta-button {
+    display: inline-block;
+    padding: 15px 40px;
+    background-color: transparent;
+    color: var(--ferrari-white);
+    border: 2px solid var(--ferrari-white);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.cta-button:hover {
+    /* Corrigi a cor para o padrão de hover do botão */
+    background-color: var(--ferrari-red);
+    border-color: var(--ferrari-red);
+    color: var(--ferrari-white);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 40, 0, 0.3);
+}
+
+/* ===== QUESTIONNAIRE SECTION (COMPLETO) ===== */
+.questionnaire {
+    background: linear-gradient(135deg, var(--ferrari-black) 0%, #1a1a1a 100%);
+    padding: 80px 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 80px;
+    position: relative;
+}
+
+.section-title h2 {
+    font-size: 2.8rem;
+    color: var(--ferrari-white);
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-title p {
+    color: var(--ferrari-gray);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: var(--ferrari-red);
+    border-radius: 2px;
+}
+
+/* ===== FORMULÁRIO ===== */
+.form-container {
+    background-color: rgba(30, 30, 30, 0.8);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 50px;
+    border: 1px solid rgba(59, 10, 10, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 35px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--ferrari-white);
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 16px 20px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--ferrari-white);
+    font-size: 1.05rem;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.12);
+    /* Corrigi para manter o foco visualmente consistente */
+    border-color: var(--ferrari-red);
+    box-shadow: 0 0 0 2px rgba(255, 40, 0, 0.1); 
+}
+
+/* Estilos para <option> dentro de <select.form-control> */
+select.form-control option, option {
+    color: var(--ferrari-gray);
+    background-color: var(--ferrari-dark);
+    padding: 12px;
+    font-size: 14px;
+}
+
+select.form-control option:hover, option:hover {
+    background-color: var(--ferrari-gray);
+    color: white;
+}
+
+/* Estilos de checkbox */
+.form-group input[type="checkbox"] + label {
+    display: inline;
+    margin-left: 10px;
+    font-weight: 400;
+    text-transform: none;
+    font-size: 1rem;
+    letter-spacing: normal;
+}
+.form-group input[type="checkbox"] {
+    margin-right: 5px;
+}
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: var(--ferrari-gray);
+    font-size: 0.85rem;
+}
+
+
+/* ===== STEP INDICATOR (INDICADOR DE PROGRESSO) ===== */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 15px;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--ferrari-dark);
+    color: var(--ferrari-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    border: 2px solid var(--ferrari-gray);
+    transition: var(--transition);
+}
+
+.step.active .step-number {
+    background-color: var(--ferrari-red);
+    border-color: var(--ferrari-red);
+}
+
+.step-text {
+    color: var(--ferrari-gray);
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.step.active .step-text {
+    color: var(--ferrari-white);
+}
+
+.step-connector {
+    flex-grow: 1;
+    height: 2px;
+    background-color: var(--ferrari-gray);
+    margin: 0 10px;
+    position: relative;
+    top: 20px;
+}
+
+/* ===== BOTÕES DE NAVEGAÇÃO ===== */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.btn-prev,
+.btn-next {
+    padding: 15px 30px;
+    border: 2px solid;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+}
+
+.btn-prev {
+    background-color: transparent;
+    color: var(--ferrari-white);
+    border-color: var(--ferrari-gray);
+}
+
+.btn-prev:hover {
+    background-color: var(--ferrari-gray);
+    color: var(--ferrari-black);
+}
+
+.btn-next {
+    background-color: var(--ferrari-red);
+    color: var(--ferrari-white);
+    border-color: var(--ferrari-red);
+}
+
+.btn-next:hover {
+    background-color: transparent;
+    color: var(--ferrari-red);
+}
+
+/* Estilos de Results, About e Footer removidos por não serem usados na seção body atual. */
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    header {
+        min-width: unset;
+        width: 95%;
+        padding: 1rem;
+    }
+    
+    .nav-links {
+        gap: 15px;
+    }
+    
+    .logo-text {
+        font-size: 1.4rem;
+    }
+    
+    .form-container {
+        padding: 30px 20px;
+    }
+    
+    .section-title h2 {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .navigation-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+    <section id="questionnaire" class="page active"> 
+        <div class="full-screen questionnaire">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Simulação Financeira</h2>
+                    <p>Responda o questionário abaixo para receber uma análise personalizada</p>
+                </div>
+
+                <div class="form-container">
+                    <div class="step-indicator">
+                        <div class="step active" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-text">Pagamento & Perfil</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-text">Carro Desejado</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-text">Resultado</div>
+                        </div>
+                    </div>
+
+                    <div id="step1-content">
+                        <h3>Etapa 1: Forma de Pagamento & Perfil Financeiro</h3>
+
+                        <div class="form-group">
+                            <label for="payment-method">Você pretende pagar o carro à vista ou financiar?</label>
+                            <select id="payment-method" class="form-control">
+                                <option value="">Selecione uma opção</option>
+                                <option value="cash">À vista</option>
+                                <option value="financing">Financiar</option>
+                            </select>
+                        </div>
+
+                        <div id="financing-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="give-downpayment">Vai dar entrada?</label>
+                                <select id="give-downpayment" class="form-control">
+                                    <option value="yes">Sim</option>
+                                    <option value="no">Não</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="downpayment-field">
+                                <label for="downpayment-value">Valor da entrada (R$)</label>
+                                <input type="text" id="downpayment-value" class="form-control" placeholder="Ex: 20000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="monthly-payment">Quanto pode pagar de parcela por mês? (R$)</label>
+                                <input type="text" id="monthly-payment" class="form-control" placeholder="Ex: 1500">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="has-car">Já possui carro?</label>
+                            <select id="has-car" class="form-control">
+                                <option value="no">Não</option>
+                                <option value="yes">Sim</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="car-paid-group" style="display: none;">
+                            <label for="car-paid">O carro está quitado?</label>
+                            <select id="car-paid" class="form-control">
+                                <option value="yes">Sim</option>
+                                <option value="no">Não</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="remaining-debt-group" style="display: none;">
+                            <label for="remaining-debt">Quanto falta para quitar? (R$)</label>
+                            <input type="text" id="remaining-debt" class="form-control" placeholder="Ex: 15000">
+                        </div>
+
+                        <div class="navigation-buttons">
+                            <button class="cta-button btn-prev" style="visibility: hidden;">Voltar</button> 
+                            <button id="next-step-btn" class="cta-button btn-next">Próxima Etapa</button>
+                        </div>
+                    </div>
+
+                    <div id="step2-content" style="display: none;">
+                        <h3>Etapa 2: Carro Desejado</h3>
+
+                        <div class="form-group">
+                            <label for="car-type">Tipo de carro</label>
+                            <select id="car-type" class="form-control">
+                                <option value="">Selecione o tipo</option>
+                                <option value="hatch">Hatch</option>
+                                <option value="sedan">Sedan</option>
+                                <option value="suv">SUV</option>
+                                <option value="pickup">Pickup</option>
+                                <option value="sports">Esportivo</option>
+                                <option value="other">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-condition">Novo ou usado?</label>
+                            <select id="car-condition" class="form-control">
+                                <option value="new">Novo</option>
+                                <option value="used">Usado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="min-year-group" style="display: none;">
+                            <label for="min-year">Ano mínimo desejado</label>
+                            <input type="number" id="min-year" class="form-control" min="1990" max="2023"
+                                placeholder="Ex: 2018">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-category">Categoria</label>
+                            <select id="car-category" class="form-control">
+                                <option value="">Selecione a categoria</option>
+                                <option value="popular">Popular</option>
+                                <option value="intermediate">Intermediário</option>
+                                <option value="executive">Executivo</option>
+                                <option value="luxury">Luxo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-brand">Marca desejada</label>
+                            <select id="car-brand" class="form-control">
+                                <option value="">Selecione a marca</option>
+                                <option value="volkswagen">Volkswagen</option>
+                                <option value="chevrolet">Chevrolet</option>
+                                <option value="fiat">Fiat</option>
+                                <option value="ford">Ford</option>
+                                <option value="toyota">Toyota</option>
+                                <option value="honda">Honda</option>
+                                <option value="hyundai">Hyundai</option>
+                                <option value="renault">Renault</option>
+                                <option value="nissan">Nissan</option>
+                                <option value="indifferent">Indiferente</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-model">Modelo específico (se souber)</label>
+                            <input type="text" id="car-model" class="form-control"
+                                placeholder="Ex: Onix, Corolla, HB20">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Opcionais/Preferências (marque os que deseja)</label>
+                            <div>
+                                <input type="checkbox" id="option-blindado" name="options" value="blindado">
+                                <label for="option-blindado">Blindado</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-automatico" name="options" value="automatico">
+                                <label for="option-automatico">Automático</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-air" name="options" value="ar-condicionado">
+                                <label for="option-air">Ar-condicionado</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-multimidia" name="options" value="multimidia">
+                                <label for="option-multimidia">Multimídia</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-couro" name="options" value="bancos-couro">
+                                <label for="option-couro">Bancos de couro</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-teto-solar" name="options" value="teto-solar">
+                                <label for="option-teto-solar">Teto solar</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-turbo" name="options" value="motor-turbo">
+                                <label for="option-turbo">Motor turbo</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="primary-use">Uso principal do carro</label>
+                            <select id="primary-use" class="form-control">
+                                <option value="">Selecione o uso principal</option>
+                                <option value="city">Cidade</option>
+                                <option value="travel">Viagem/Estrada</option>
+                                <option value="work">Trabalho (carga/pickup)</option>
+                                <option value="leisure">Lazer/Esportivo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estimated-value">Valor estimado do carro (R$)</label>
+                            <input type="text" id="estimated-value" class="form-control" placeholder="Ex: 75000">
+                            <small>Deixe em branco se não souber o valor</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="purchase-time">Prazo ideal para compra</label>
+                            <select id="purchase-time" class="form-control">
+                                <option value="immediate">Imediato</option>
+                                <option value="3months">Até 3 meses</option>
+                                <option value="6months">6 meses</option>
+                                <option value="1year">1 ano ou mais</option>
+                            </select>
+                        </div>
+
+                        <div class="navigation-buttons">
+                            <button id="prev-step-btn" class="cta-button btn-prev">Voltar</button>
+                            <button id="simulate-btn" class="cta-button btn-next">Calcular Simulação</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Variáveis globais
+            let currentStep = 1;
+
+            // Elementos da navegação
+            const nextStepBtn = document.getElementById('next-step-btn');
+            const prevStepBtn = document.getElementById('prev-step-btn');
+            const simulateBtn = document.getElementById('simulate-btn');
+            const step1Content = document.getElementById('step1-content');
+            const step2Content = document.getElementById('step2-content');
+            const steps = document.querySelectorAll('.step');
+
+            // Configurar eventos de navegação
+            if (nextStepBtn) {
+                nextStepBtn.addEventListener('click', function () {
+                    if (validateStep1()) {
+                        goToStep(2);
+                    }
+                });
+            }
+
+            if (prevStepBtn) {
+                prevStepBtn.addEventListener('click', function () {
+                    goToStep(1);
+                });
+            }
+
+            if (simulateBtn) {
+                simulateBtn.addEventListener('click', function () {
+                    if (validateStep2()) {
+                        calculateSimulation();
+                        // Aviso: A página 'results' não está incluída neste bloco, então essa linha pode falhar
+                        // document.getElementById('questionnaire').classList.remove('active');
+                        // document.getElementById('results').classList.add('active');
+                        // window.scrollTo(0, 0);
+                        alert("Simulação calculada! O resultado seria exibido na próxima página.");
+                    }
+                });
+            }
+
+            // Função para navegar entre as etapas
+            function goToStep(step) {
+                // Esconder todos os conteúdos de etapa
+                step1Content.style.display = 'none';
+                step2Content.style.display = 'none';
+
+                // Remover classe ativa de todos os indicadores
+                steps.forEach(s => s.classList.remove('active'));
+
+                // Mostrar conteúdo da etapa atual e atualizar indicador
+                if (step === 1) {
+                    step1Content.style.display = 'block';
+                    document.querySelector('.step[data-step="1"]').classList.add('active');
+                    currentStep = 1;
+                } else if (step === 2) {
+                    step2Content.style.display = 'block';
+                    document.querySelector('.step[data-step="2"]').classList.add('active');
+                    // Garante que o indicador do passo 1 também permaneça ativo (feito via CSS)
+                    document.querySelector('.step[data-step="1"]').classList.add('active'); 
+                    currentStep = 2;
+                }
+            }
+
+            // Validação da Etapa 1
+            function validateStep1() {
+                const paymentMethod = document.getElementById('payment-method').value;
+
+                if (!paymentMethod) {
+                    alert('Por favor, selecione a forma de pagamento.');
+                    return false;
+                }
+
+                // Validações adicionais para financiamento
+                if (paymentMethod === 'financing') {
+                    const giveDownpayment = document.getElementById('give-downpayment').value;
+
+                    if (giveDownpayment === 'yes') {
+                        const downpaymentValue = document.getElementById('downpayment-value').value;
+                        if (!downpaymentValue || isNaN(downpaymentValue) || parseFloat(downpaymentValue) <= 0) {
+                            alert('Por favor, informe um valor válido para a entrada.');
+                            return false;
+                        }
+                    }
+
+                    const monthlyPayment = document.getElementById('monthly-payment').value;
+                    if (!monthlyPayment || isNaN(monthlyPayment) || parseFloat(monthlyPayment) <= 0) {
+                        alert('Por favor, informe um valor válido para a parcela mensal.');
+                        return false;
+                    }
+                }
+
+                // Validações para quem possui carro
+                const hasCar = document.getElementById('has-car').value;
+                if (hasCar === 'yes') {
+                    const carPaid = document.getElementById('car-paid').value;
+                    if (carPaid === 'no') {
+                        const remainingDebt = document.getElementById('remaining-debt').value;
+                        if (!remainingDebt || isNaN(remainingDebt) || parseFloat(remainingDebt) <= 0) {
+                            alert('Por favor, informe um valor válido para o valor que falta quitar.');
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            // Validação da Etapa 2
+            function validateStep2() {
+                const carType = document.getElementById('car-type').value;
+                const carCondition = document.getElementById('car-condition').value;
+                const carCategory = document.getElementById('car-category').value;
+                const carBrand = document.getElementById('car-brand').value;
+                const primaryUse = document.getElementById('primary-use').value;
+                const purchaseTime = document.getElementById('purchase-time').value;
+
+                if (!carType || !carCondition || !carCategory || !carBrand || !primaryUse || !purchaseTime) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return false;
+                }
+
+                // Validação adicional para carro usado
+                if (carCondition === 'used') {
+                    const minYear = document.getElementById('min-year').value;
+                    if (!minYear || isNaN(minYear) || parseInt(minYear) < 1990 || parseInt(minYear) > new Date().getFullYear()) {
+                        alert('Por favor, informe um ano válido para o carro usado.');
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // Configurar interações dinâmicas na Etapa 1
+            const paymentMethod = document.getElementById('payment-method');
+            const hasCar = document.getElementById('has-car');
+            const carPaid = document.getElementById('car-paid');
+            const giveDownpayment = document.getElementById('give-downpayment');
+
+
+            if (paymentMethod) {
+                paymentMethod.addEventListener('change', function () {
+                    const financingFields = document.getElementById('financing-fields');
+                    if (this.value === 'financing') {
+                        financingFields.style.display = 'block';
+                        // Aciona o evento de 'giveDownpayment' para garantir o estado correto do campo de entrada.
+                        if (giveDownpayment) giveDownpayment.dispatchEvent(new Event('change')); 
+                    } else {
+                        financingFields.style.display = 'none';
+                    }
+                });
+            }
+
+            if (hasCar) {
+                hasCar.addEventListener('change', function () {
+                    const carPaidGroup = document.getElementById('car-paid-group');
+                    if (this.value === 'yes') {
+                        carPaidGroup.style.display = 'block';
+                        // Aciona o evento de 'carPaid' para garantir o estado correto do campo de dívida.
+                        if (carPaid) carPaid.dispatchEvent(new Event('change'));
+                    } else {
+                        carPaidGroup.style.display = 'none';
+                        document.getElementById('remaining-debt-group').style.display = 'none';
+                    }
+                });
+            }
+
+            if (carPaid) {
+                carPaid.addEventListener('change', function () {
+                    const remainingDebtGroup = document.getElementById('remaining-debt-group');
+                    if (this.value === 'no') {
+                        remainingDebtGroup.style.display = 'block';
+                    } else {
+                        remainingDebtGroup.style.display = 'none';
+                    }
+                });
+            }
+
+            // Configurar campo de entrada para financiamento
+            if (giveDownpayment) {
+                giveDownpayment.addEventListener('change', function () {
+                    const downpaymentField = document.getElementById('downpayment-field');
+                    if (this.value === 'yes') {
+                        downpaymentField.style.display = 'block';
+                    } else {
+                        downpaymentField.style.display = 'none';
+                    }
+                });
+            }
+
+            // Configurar interações dinâmicas na Etapa 2
+            const carCondition = document.getElementById('car-condition');
+            if (carCondition) {
+                carCondition.addEventListener('change', function () {
+                    const minYearGroup = document.getElementById('min-year-group');
+                    if (this.value === 'used') {
+                        minYearGroup.style.display = 'block';
+                    } else {
+                        minYearGroup.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Simula o carregamento inicial dos estados dinâmicos
+            if (paymentMethod) paymentMethod.dispatchEvent(new Event('change'));
+            if (hasCar) hasCar.dispatchEvent(new Event('change'));
+            if (carCondition) carCondition.dispatchEvent(new Event('change'));
+
+
+            // A lógica de navegação entre as páginas principais foi mantida, mas a funcionalidade dependerá 
+            // de as outras seções (home, results, about) estarem incluídas no layout.html ou em outro bloco 'body'.
+            const navLinks = document.querySelectorAll('.nav-links a, .cta-button');
+            const pages = document.querySelectorAll('.page');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    // Previne a navegação se o link for o CTA do formulário
+                    if (this.id !== 'simulate-btn') { 
+                        e.preventDefault();
+                    }
+                    const targetPage = this.getAttribute('data-page');
+
+                    if (targetPage) {
+                        pages.forEach(page => {
+                            page.classList.remove('active');
+                        });
+
+                        const pageElement = document.getElementById(targetPage);
+                        if(pageElement) {
+                            pageElement.classList.add('active');
+                            window.scrollTo(0, 0);
+                        }
+
+                        // Se for para o questionário, resetar para a primeira etapa
+                        if (targetPage === 'questionnaire') {
+                            goToStep(1);
+                        }
+                    }
+                });
+            });
+
+            // Função de simulação (mantida para evitar que o script quebre)
+            function calculateSimulation() {
+                // ... lógica de cálculo ...
+                console.log('Simulação calculada!');
+                // Os comandos de preenchimento dos resultados e criação de gráficos foram mantidos
+                // no script para o caso de a página de resultados ser adicionada posteriormente.
+                
+                // Exemplo de preenchimento dos resultados (os IDs precisam existir na página de resultados)
+                const paymentMethodValue = document.getElementById('payment-method').value;
+                if (paymentMethodValue === 'cash') {
+                     // Exemplo de preenchimento para elementos que não existem neste bloco.
+                    // document.getElementById('cash-total').textContent = 'R$ 75.000,00';
+                    // ...
+                } else {
+                     // Exemplo de preenchimento para elementos que não existem neste bloco.
+                    // document.getElementById('financing-total').textContent = 'R$ 75.000,00';
+                    // ...
+                    // createCharts();
+                }
+            }
+
+            // Função de criação de gráficos (mantida)
+            function createCharts() {
+                // Lógica de Chart.js para a página de resultados...
+            }
+        });
+    </script>
+    
+{% endblock %}

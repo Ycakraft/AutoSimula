@@ -1,222 +1,329 @@
-// Menu Mobile
-const menuIcon = document.querySelector('.menu-icon');
-const mainNav = document.querySelector('.main-nav');
+ document.addEventListener('DOMContentLoaded', function () {
+            // Variáveis globais
+            let currentStep = 1;
 
-menuIcon.addEventListener('click', () => {
-    mainNav.classList.toggle('active');
-});
+            // Elementos da navegação
+            const nextStepBtn = document.getElementById('next-step-btn');
+            const prevStepBtn = document.getElementById('prev-step-btn');
+            const simulateBtn = document.getElementById('simulate-btn');
+            const step1Content = document.getElementById('step1-content');
+            const step2Content = document.getElementById('step2-content');
+            const steps = document.querySelectorAll('.step');
 
-// Fechar menu ao clicar fora
-document.addEventListener('click', (e) => {
-    if (!mainNav.contains(e.target) && !menuIcon.contains(e.target)) {
-        mainNav.classList.remove('active');
-    }
-});
+            // Configurar eventos de navegação
+            if (nextStepBtn) {
+                nextStepBtn.addEventListener('click', function () {
+                    if (validateStep1()) {
+                        goToStep(2);
+                    }
+                });
+            }
 
-// Scroll suave para as seções
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            if (prevStepBtn) {
+                prevStepBtn.addEventListener('click', function () {
+                    goToStep(1);
+                });
+            }
+
+            if (simulateBtn) {
+                simulateBtn.addEventListener('click', function () {
+                    if (validateStep2()) {
+                        calculateSimulation();
+                        // Ir para a página de resultados
+                        document.getElementById('questionnaire').classList.remove('active');
+                        document.getElementById('results').classList.add('active');
+                        window.scrollTo(0, 0);
+                    }
+                });
+            }
+
+            // Função para navegar entre as etapas
+            function goToStep(step) {
+                // Esconder todos os conteúdos de etapa
+                step1Content.style.display = 'none';
+                step2Content.style.display = 'none';
+
+                // Remover classe ativa de todos os indicadores
+                steps.forEach(s => s.classList.remove('active'));
+
+                // Mostrar conteúdo da etapa atual e atualizar indicador
+                if (step === 1) {
+                    step1Content.style.display = 'block';
+                    document.querySelector('.step[data-step="1"]').classList.add('active');
+                    currentStep = 1;
+                } else if (step === 2) {
+                    step2Content.style.display = 'block';
+                    document.querySelector('.step[data-step="2"]').classList.add('active');
+                    currentStep = 2;
+                }
+            }
+
+            // Validação da Etapa 1
+            function validateStep1() {
+                const paymentMethod = document.getElementById('payment-method').value;
+
+                if (!paymentMethod) {
+                    alert('Por favor, selecione a forma de pagamento.');
+                    return false;
+                }
+
+                // Validações adicionais para financiamento
+                if (paymentMethod === 'financing') {
+                    const giveDownpayment = document.getElementById('give-downpayment').value;
+
+                    if (giveDownpayment === 'yes') {
+                        const downpaymentValue = document.getElementById('downpayment-value').value;
+                        if (!downpaymentValue || isNaN(downpaymentValue) || parseFloat(downpaymentValue) <= 0) {
+                            alert('Por favor, informe um valor válido para a entrada.');
+                            return false;
+                        }
+                    }
+
+                    const monthlyPayment = document.getElementById('monthly-payment').value;
+                    if (!monthlyPayment || isNaN(monthlyPayment) || parseFloat(monthlyPayment) <= 0) {
+                        alert('Por favor, informe um valor válido para a parcela mensal.');
+                        return false;
+                    }
+                }
+
+                // Validações para quem possui carro
+                const hasCar = document.getElementById('has-car').value;
+                if (hasCar === 'yes') {
+                    const carPaid = document.getElementById('car-paid').value;
+                    if (carPaid === 'no') {
+                        const remainingDebt = document.getElementById('remaining-debt').value;
+                        if (!remainingDebt || isNaN(remainingDebt) || parseFloat(remainingDebt) <= 0) {
+                            alert('Por favor, informe um valor válido para o valor que falta quitar.');
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            // Validação da Etapa 2
+            function validateStep2() {
+                const carType = document.getElementById('car-type').value;
+                const carCondition = document.getElementById('car-condition').value;
+                const carCategory = document.getElementById('car-category').value;
+                const carBrand = document.getElementById('car-brand').value;
+                const primaryUse = document.getElementById('primary-use').value;
+                const purchaseTime = document.getElementById('purchase-time').value;
+
+                if (!carType || !carCondition || !carCategory || !carBrand || !primaryUse || !purchaseTime) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return false;
+                }
+
+                // Validação adicional para carro usado
+                if (carCondition === 'used') {
+                    const minYear = document.getElementById('min-year').value;
+                    if (!minYear || isNaN(minYear) || parseInt(minYear) < 1990 || parseInt(minYear) > new Date().getFullYear()) {
+                        alert('Por favor, informe um ano válido para o carro usado.');
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // Configurar interações dinâmicas na Etapa 1
+            const paymentMethod = document.getElementById('payment-method');
+            const hasCar = document.getElementById('has-car');
+            const carPaid = document.getElementById('car-paid');
+
+            if (paymentMethod) {
+                paymentMethod.addEventListener('change', function () {
+                    const financingFields = document.getElementById('financing-fields');
+                    if (this.value === 'financing') {
+                        financingFields.style.display = 'block';
+                    } else {
+                        financingFields.style.display = 'none';
+                    }
+                });
+            }
+
+            if (hasCar) {
+                hasCar.addEventListener('change', function () {
+                    const carPaidGroup = document.getElementById('car-paid-group');
+                    if (this.value === 'yes') {
+                        carPaidGroup.style.display = 'block';
+                    } else {
+                        carPaidGroup.style.display = 'none';
+                        document.getElementById('remaining-debt-group').style.display = 'none';
+                    }
+                });
+            }
+
+            if (carPaid) {
+                carPaid.addEventListener('change', function () {
+                    const remainingDebtGroup = document.getElementById('remaining-debt-group');
+                    if (this.value === 'no') {
+                        remainingDebtGroup.style.display = 'block';
+                    } else {
+                        remainingDebtGroup.style.display = 'none';
+                    }
+                });
+            }
+
+            // Configurar interações dinâmicas na Etapa 2
+            const carCondition = document.getElementById('car-condition');
+            if (carCondition) {
+                carCondition.addEventListener('change', function () {
+                    const minYearGroup = document.getElementById('min-year-group');
+                    if (this.value === 'used') {
+                        minYearGroup.style.display = 'block';
+                    } else {
+                        minYearGroup.style.display = 'none';
+                    }
+                });
+            }
+
+            // Configurar campo de entrada para financiamento
+            const giveDownpayment = document.getElementById('give-downpayment');
+            if (giveDownpayment) {
+                giveDownpayment.addEventListener('change', function () {
+                    const downpaymentField = document.getElementById('downpayment-field');
+                    if (this.value === 'yes') {
+                        downpaymentField.style.display = 'block';
+                    } else {
+                        downpaymentField.style.display = 'none';
+                    }
+                });
+            }
+
+            // Navegação entre páginas principais
+            const navLinks = document.querySelectorAll('.nav-links a, .cta-button');
+            const pages = document.querySelectorAll('.page');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetPage = this.getAttribute('data-page');
+
+                    if (targetPage) {
+                        pages.forEach(page => {
+                            page.classList.remove('active');
+                        });
+
+                        document.getElementById(targetPage).classList.add('active');
+                        window.scrollTo(0, 0);
+
+                        // Se for para o questionário, resetar para a primeira etapa
+                        if (targetPage === 'questionnaire') {
+                            goToStep(1);
+                        }
+                    }
+                });
             });
-            mainNav.classList.remove('active');
-        }
-    });
-});
 
-// Animação dos cards ao rolar
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
+            // Função de simulação (exemplo)
+            function calculateSimulation() {
+                // Aqui viria a lógica de cálculo da simulação
+                console.log('Simulação calculada!');
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
-    });
-}, observerOptions);
+                // Exemplo de preenchimento dos resultados
+                document.getElementById('cash-total').textContent = 'R$ 75.000,00';
+                document.getElementById('cash-discount').textContent = 'R$ 3.750,00';
+                document.getElementById('cash-final').textContent = 'R$ 71.250,00';
+                document.getElementById('result-car-model').textContent = 'Volkswagen Golf 2023';
+                document.getElementById('result-car-price').textContent = 'R$ 75.000,00';
+                document.getElementById('result-car-options').textContent = 'Automático, Ar-condicionado, Multimídia';
 
-document.querySelectorAll('.service-card, .team-member, .dashboard-card').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'all 0.6s ease-out';
-    observer.observe(el);
-});
+                document.getElementById('financing-total').textContent = 'R$ 75.000,00';
+                document.getElementById('financing-downpayment').textContent = 'R$ 15.000,00';
+                document.getElementById('financing-amount').textContent = 'R$ 60.000,00';
+                document.getElementById('financing-installments').textContent = '48x';
+                document.getElementById('financing-monthly').textContent = 'R$ 1.450,00';
+                document.getElementById('financing-totalpaid').textContent = 'R$ 84.600,00';
+                document.getElementById('financing-interest').textContent = 'R$ 9.600,00';
+                document.getElementById('financing-percentage').textContent = '80% financiado, 20% entrada';
+                document.getElementById('financing-car-model').textContent = 'Volkswagen Golf 2023';
+                document.getElementById('financing-car-price').textContent = 'R$ 75.000,00';
+                document.getElementById('financing-car-options').textContent = 'Automático, Ar-condicionado, Multimídia';
+                document.getElementById('monthly-savings').textContent = 'R$ 250,00';
+                document.getElementById('ideal-purchase-time').textContent = '3 meses';
 
-// Atualização do Dashboard com dados reais
-async function updateDashboardData() {
-    try {
-        const response = await fetch('http://localhost:5000/api/dashboard/data');
-        const data = await response.json();
+                // Mostrar o resultado correto baseado no tipo de pagamento
+                const paymentMethod = document.getElementById('payment-method').value;
+                if (paymentMethod === 'cash') {
+                    document.getElementById('cash-result').style.display = 'block';
+                    document.getElementById('financing-result').style.display = 'none';
+                } else {
+                    document.getElementById('cash-result').style.display = 'none';
+                    document.getElementById('financing-result').style.display = 'block';
 
-        if (data.success) {
-            // Atualizar total de pacientes
-            document.querySelector('#total-pacientes').textContent = data.total_pacientes;
+                    // Criar gráficos
+                    createCharts();
+                }
+            }
 
-            // Atualizar leitos ocupados
-            document.querySelector('#leitos-ocupados').textContent = data.leitos_ocupados;
+            // Criar gráficos para financiamento
+            function createCharts() {
+                // Gráfico de composição do financiamento
+                const financingCtx = document.getElementById('financingChart');
+                if (financingCtx) {
+                    new Chart(financingCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Valor do Veículo', 'Juros'],
+                            datasets: [{
+                                data: [75000, 9600],
+                                backgroundColor: ['#ff2800', '#d9d9d9'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: '#d9d9d9',
+                                        font: { size: 12 }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
 
-            // Atualizar tempo médio de espera
-            const tempoMedio = data.tempo_medio;
-            document.querySelector('#tempo-medio').textContent = 
-                tempoMedio > 60 
-                    ? `${Math.floor(tempoMedio / 60)}h ${tempoMedio % 60}min`
-                    : `${tempoMedio}min`;
-
-            // Atualizar gráfico de atendimentos
-            updateAtendimentosChart(data.grafico_atendimentos);
-        } else {
-            console.error('Erro ao buscar dados:', data.error);
-        }
-    } catch (error) {
-        console.error('Erro na requisição:', error);
-    }
-}
-
-function updateAtendimentosChart(dados) {
-    const chart = document.querySelector('#atendimentos-chart');
-    if (!chart) return;
-
-    // Criar barras do gráfico
-    const maxTotal = Math.max(...dados.map(d => d.total));
-    const chartHtml = dados.map(d => {
-        const altura = (d.total / maxTotal) * 100;
-        return `
-            <div class="chart-bar-container">
-                <div class="chart-bar" style="height: ${altura}%"></div>
-                <div class="chart-label">${d.hora}h</div>
-                <div class="chart-value">${d.total}</div>
-            </div>
-        `;
-    }).join('');
-
-    chart.innerHTML = chartHtml;
-}
-
-// Atualizar dados a cada 30 segundos
-setInterval(updateDashboardData, 30000);
-
-// Efeito de hover nos botões de serviço
-document.querySelectorAll('.service-btn').forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-        btn.style.transform = 'translateY(-5px)';
-        btn.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
-    });
-    
-    btn.addEventListener('mouseleave', () => {
-        btn.style.transform = 'translateY(0)';
-        btn.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
-    });
-});
-
-// Header fixo com mudança de cor ao rolar
-const header = document.querySelector('header');
-
-window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-    
-    // Apenas adiciona a classe scrolled para efeitos visuais
-    if (currentScroll > 50) {
-        header.classList.add('scrolled');
-    } else {
-        header.classList.remove('scrolled');
-    }
-});
-
-// Carrossel de Serviços
-const carousel = document.querySelector('.services-carousel');
-const prevButton = document.querySelector('.prev-button');
-const nextButton = document.querySelector('.next-button');
-const cardWidth = 320; // Largura do card + gap
-
-prevButton.addEventListener('click', () => {
-    carousel.scrollBy({
-        left: -cardWidth,
-        behavior: 'smooth'
-    });
-});
-
-nextButton.addEventListener('click', () => {
-    carousel.scrollBy({
-        left: cardWidth,
-        behavior: 'smooth'
-    });
-});
-
-// Atualizar visibilidade dos botões do carrossel
-function updateCarouselButtons() {
-    const isAtStart = carousel.scrollLeft === 0;
-    const isAtEnd = carousel.scrollLeft >= (carousel.scrollWidth - carousel.clientWidth);
-    
-    prevButton.style.opacity = isAtStart ? '0.5' : '1';
-    nextButton.style.opacity = isAtEnd ? '0.5' : '1';
-    
-    prevButton.style.pointerEvents = isAtStart ? 'none' : 'auto';
-    nextButton.style.pointerEvents = isAtEnd ? 'none' : 'auto';
-}
-
-carousel.addEventListener('scroll', updateCarouselButtons);
-updateCarouselButtons();
-
-// Animação do heatmap
-const heatmapBlocks = document.querySelectorAll('.heatmap-placeholder');
-heatmapBlocks.forEach(block => {
-    block.addEventListener('mouseenter', () => {
-        block.style.transform = 'scale(1.05)';
-        block.style.transition = 'transform 0.3s ease';
-    });
-    
-    block.addEventListener('mouseleave', () => {
-        block.style.transform = 'scale(1)';
-    });
-});
-
-// Adicionar efeito de parallax suave nas imagens da equipe
-document.querySelectorAll('.member-avatar img').forEach(img => {
-    window.addEventListener('scroll', () => {
-        const rect = img.getBoundingClientRect();
-        const scrolled = window.pageYOffset;
-        const rate = scrolled * 0.1;
-        
-        if (rect.top <= window.innerHeight && rect.bottom >= 0) {
-            img.style.transform = `translateY(${rate}px)`;
-        }
-    });
-});
-
-// Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-    // Atualizar dados iniciais do dashboard
-    updateDashboardData();
-    
-    // Adicionar classe active ao link atual
-    const sections = document.querySelectorAll('section');
-    const navLinks = document.querySelectorAll('.main-nav a');
-    
-    window.addEventListener('scroll', () => {
-        let current = '';
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            
-            if (window.pageYOffset >= sectionTop - 60) {
-                current = section.getAttribute('id');
+                // Gráfico de comparação de parcelas
+                const comparisonCtx = document.getElementById('comparisonChart');
+                if (comparisonCtx) {
+                    new Chart(comparisonCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Parcela Atual', 'Nova Parcela'],
+                            datasets: [{
+                                label: 'Valor da Parcela (R$)',
+                                data: [1700, 1450],
+                                backgroundColor: ['#d9d9d9', '#ff2800'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { color: '#d9d9d9' },
+                                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                },
+                                x: {
+                                    ticks: { color: '#d9d9d9' },
+                                    grid: { display: false }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
             }
         });
-        
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href').slice(1) === current) {
-                link.classList.add('active');
-            }
-        });
-    });
-}); 
+   
