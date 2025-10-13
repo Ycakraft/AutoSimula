@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSimulate | Simulação Inteligente para Troca de Veículo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos mantidos do código original */
+        :root {
+            --ferrari-red: #ff2800;
+            --ferrari-black: #000000;
+            --ferrari-white: #ffffff;
+            --ferrari-gray: #d9d9d9;
+            --ferrari-dark: #1a1a1a;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--ferrari-black);
+            color: var(--ferrari-white);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1200px;
+            min-width: 600px;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background-color: rgba(121, 121, 121, 0.434);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--ferrari-red);
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--ferrari-white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links a:hover {
+            color: var(--ferrari-white);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--ferrari-red);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .page {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .full-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.708);
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: 30px;
+            margin-bottom: 20px;
+            color: var(--ferrari-white);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 15px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            color: var(--ferrari-gray);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: transparent;
+            color: var(--ferrari-white);
+            border: 2px solid var(--ferrari-white);
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            color: var(--ferrari-white);
+            transform: translateY(-2px);
+        }
+
+        .questionnaire {
+            background: linear-gradient(135deg, var(--ferrari-black) 0%, #1a1a1a 100%);
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 2.8rem;
+            color: var(--ferrari-white);
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-title p {
+            color: var(--ferrari-gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--ferrari-red);
+            border-radius: 2px;
+        }
+
+        .form-container {
+            background-color: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            padding: 50px;
+            border: 1px solid rgba(59, 10, 10, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--ferrari-white);
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--ferrari-white);
+            font-size: 1.05rem;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.12);
+            border: none;
+        }
+
+        option {
+            color: var(--ferrari-gray);
+            background-color: var(--ferrari-dark);
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        option:hover {
+            background-color: var(--ferrari-gray);
+            color: white;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 15px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--ferrari-dark);
+            color: var(--ferrari-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border: 2px solid var(--ferrari-gray);
+        }
+
+        .step.active .step-number {
+            background-color: var(--ferrari-red);
+            border-color: var(--ferrari-red);
+        }
+
+        .step-text {
+            color: var(--ferrari-gray);
+            font-size: 0.9rem;
+        }
+
+        .step.active .step-text {
+            color: var(--ferrari-white);
+        }
+
+        .step-connector {
+            flex-grow: 1;
+            height: 2px;
+            background-color: var(--ferrari-gray);
+            margin: 0 10px;
+            position: relative;
+            top: 20px;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn-prev {
+            background-color: transparent;
+            color: var(--ferrari-white);
+            border: 2px solid var(--ferrari-gray);
+        }
+
+        .btn-prev:hover {
+            background-color: var(--ferrari-gray);
+        }
+
+        .btn-next {
+            background-color: var(--ferrari-red);
+            color: var(--ferrari-white);
+            border: 2px solid var(--ferrari-red);
+        }
+
+        /* Results Page Styles */
+        .results {
+            background: linear-gradient(rgba(10, 10, 10, 0.95), rgba(20, 20, 20, 0.98));
+            padding: 100px 0;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .dashboard-card {
+            background-color: rgba(30, 30, 30, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(150, 150, 150, 0.4);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .dashboard-card h3 {
+            color: var(--ferrari-white);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(100, 100, 100, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .dashboard-card h3 i {
+            font-size: 1.6rem;
+            color: var(--ferrari-gray);
+        }
+
+        .chart-container {
+            height: 250px;
+            margin-top: 20px;
+            background: rgba(40, 40, 40, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .comparison {
+            display: flex;
+            justify-content: space-between;
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .car-card {
+            flex: 1;
+            background-color: rgba(30, 30, 30, 0.9);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .car-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(150, 150, 150, 0.4);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .car-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .car-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(30, 30, 30, 0.9) 0%, transparent 100%);
+        }
+
+        .car-details {
+            padding: 25px;
+        }
+
+        .car-details h4 {
+            color: var(--ferrari-white);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .car-details p {
+            color: var(--ferrari-gray);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .specs {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(100, 100, 100, 0.3);
+        }
+
+        .spec {
+            text-align: center;
+            flex: 1;
+        }
+
+        .spec-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--ferrari-white);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .spec-label {
+            font-size: 0.85rem;
+            color: var(--ferrari-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .highlight {
+            color: var(--ferrari-red);
+            font-weight: 600;
+        }
+
+        .financial-data {
+            margin-top: 15px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            color: var(--ferrari-gray);
+        }
+
+        .data-value {
+            color: var(--ferrari-white);
+            font-weight: 600;
+        }
+
+        /* About Page Styles */
+        .about {
+            background: linear-gradient(rgba(10, 10, 10, 0.95), rgba(20, 20, 20, 0.98));
+            padding: 100px 0;
+        }
+
+        .team-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 60px;
+        }
+
+        .team-member {
+            width: 280px;
+            text-align: center;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 16px;
+            padding: 30px 25px;
+            transition: var(--transition);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .team-member:hover {
+            transform: translateY(-8px);
+            border-color: rgba(150, 150, 150, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .member-photo {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            border: 3px solid var(--ferrari-gray);
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .team-member:hover .member-photo {
+            border-color: var(--ferrari-white);
+        }
+
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .team-member:hover .member-photo img {
+            transform: scale(1.05);
+        }
+
+        .member-name {
+            color: var(--ferrari-white);
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .member-role {
+            color: var(--ferrari-gray);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .member-role::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: var(--ferrari-gray);
+        }
+
+        .member-description {
+            color: var(--ferrari-gray);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(100, 100, 100, 0.3);
+            color: var(--ferrari-white);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background: var(--ferrari-white);
+            color: var(--ferrari-black);
+            transform: translateY(-3px);
+        }
+
+        .about-mission {
+            max-width: 800px;
+            margin: 60px auto;
+            text-align: center;
+            padding: 40px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 16px;
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .about-mission h3 {
+            color: var(--ferrari-white);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .about-mission p {
+            color: var(--ferrari-gray);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(rgba(5, 5, 5, 0.98), rgba(15, 15, 15, 0.97));
+            padding: 70px 0 30px;
+            border-top: 1px solid rgba(80, 80, 80, 0.2);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-column h3 {
+            color: var(--ferrari-white);
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--ferrari-gray);
+        }
+
+        .footer-column p,
+        .footer-column a {
+            color: var(--ferrari-gray);
+            margin-bottom: 12px;
+            display: block;
+            text-decoration: none;
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+
+        .footer-column a:hover {
+            color: var(--ferrari-white);
+            transform: translateX(5px);
+        }
+
+        .contact-info {
+            margin-top: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .contact-item i {
+            color: var(--ferrari-white);
+            font-size: 1.1rem;
+            margin-top: 3px;
+            min-width: 20px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background-color: rgba(80, 80, 80, 0.2);
+            color: var(--ferrari-gray);
+            transition: var(--transition);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .social-icons a:hover {
+            background-color: var(--ferrari-white);
+            color: var(--ferrari-black);
+            transform: translateY(-3px);
+            border-color: var(--ferrari-white);
+        }
+
+        .newsletter-form {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 12px 15px;
+            background: rgba(80, 80, 80, 0.2);
+            border: 1px solid rgba(100, 100, 100, 0.3);
+            border-radius: 8px;
+            color: var(--ferrari-white);
+            font-size: 0.9rem;
+        }
+
+        .newsletter-input:focus {
+            outline: none;
+            border-color: var(--ferrari-white);
+        }
+
+        .newsletter-btn {
+            padding: 12px 20px;
+            background: var(--ferrari-white);
+            color: var(--ferrari-black);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .newsletter-btn:hover {
+            background: var(--ferrari-gray);
+            color: var(--ferrari-white);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(80, 80, 80, 0.3);
+            color: var(--ferrari-gray);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+        }
+
+        .footer-links a {
+            color: var(--ferrari-gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--ferrari-white);
+        }
+
+        .chart-wrapper {
+    height: 100px;
+    position: relative;
+}
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <div class="logo-text">AutoSimulate</div>
+            </div>
+            <nav class="nav-links">
+                <a href="#" data-page="home">Home</a>
+                <a href="#" data-page="questionnaire">Simulação</a>
+                <a href="#" data-page="results">Resultados</a>
+                <a href="#" data-page="about">Sobre Nós</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Home Page -->
+    <section id="home" class="page active">
+        <div class="full-screen hero">
+            <video autoplay muted loop playsinline>
+                <source src="templates/melhor.mp4" type="video/mp4">
+                Seu navegador não suporta vídeos em HTML5.
+            </video>
+            <div class="container">
+                <h1>Simulação Inteligente para Troca de Veículo</h1>
+                <p>Descubra se é o momento certo para trocar seu carro com nossa análise financeira avançada e dados
+                    reais do mercado automotivo.</p>
+                <a href="#" class="cta-button" data-page="questionnaire">Iniciar Simulação</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Questionnaire Page -->
+    <section id="questionnaire" class="page">
+        <div class="full-screen questionnaire">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Simulação Financeira</h2>
+                    <p>Responda o questionário abaixo para receber uma análise personalizada</p>
+                </div>
+
+                <div class="form-container">
+                    <!-- Indicador de Etapas -->
+                    <div class="step-indicator">
+                        <div class="step active" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-text">Pagamento & Perfil</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-text">Carro Desejado</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-text">Resultado</div>
+                        </div>
+                    </div>
+
+                    <!-- Etapa 1 - Forma de Pagamento & Perfil Financeiro -->
+                    <div id="step1-content">
+                        <h3>Etapa 1: Forma de Pagamento & Perfil Financeiro</h3>
+
+                        <div class="form-group">
+                            <label for="payment-method">Você pretende pagar o carro à vista ou financiar?</label>
+                            <select id="payment-method" class="form-control">
+                                <option value="">Selecione uma opção</option>
+                                <option value="cash">À vista</option>
+                                <option value="financing">Financiar</option>
+                            </select>
+                        </div>
+
+                        <!-- Campos para financiamento -->
+                        <div id="financing-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="give-downpayment">Vai dar entrada?</label>
+                                <select id="give-downpayment" class="form-control">
+                                    <option value="yes">Sim</option>
+                                    <option value="no">Não</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="downpayment-field">
+                                <label for="downpayment-value">Valor da entrada (R$)</label>
+                                <input type="text" id="downpayment-value" class="form-control" placeholder="Ex: 20000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="monthly-payment">Quanto pode pagar de parcela por mês? (R$)</label>
+                                <input type="text" id="monthly-payment" class="form-control" placeholder="Ex: 1500">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="has-car">Já possui carro?</label>
+                            <select id="has-car" class="form-control">
+                                <option value="no">Não</option>
+                                <option value="yes">Sim</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="car-paid-group" style="display: none;">
+                            <label for="car-paid">O carro está quitado?</label>
+                            <select id="car-paid" class="form-control">
+                                <option value="yes">Sim</option>
+                                <option value="no">Não</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="remaining-debt-group" style="display: none;">
+                            <label for="remaining-debt">Quanto falta para quitar? (R$)</label>
+                            <input type="text" id="remaining-debt" class="form-control" placeholder="Ex: 15000">
+                        </div>
+
+                        <div class="navigation-buttons">
+                            <button class="cta-button btn-prev" style="visibility: hidden;">Voltar</button>
+                            <button id="next-step-btn" class="cta-button btn-next">Próxima Etapa</button>
+                        </div>
+                    </div>
+
+                    <!-- Etapa 2 - Carro Desejado -->
+                    <div id="step2-content" style="display: none;">
+                        <h3>Etapa 2: Carro Desejado</h3>
+
+                        <div class="form-group">
+                            <label for="car-type">Tipo de carro</label>
+                            <select id="car-type" class="form-control">
+                                <option value="">Selecione o tipo</option>
+                                <option value="hatch">Hatch</option>
+                                <option value="sedan">Sedan</option>
+                                <option value="suv">SUV</option>
+                                <option value="pickup">Pickup</option>
+                                <option value="sports">Esportivo</option>
+                                <option value="other">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-condition">Novo ou usado?</label>
+                            <select id="car-condition" class="form-control">
+                                <option value="new">Novo</option>
+                                <option value="used">Usado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="min-year-group" style="display: none;">
+                            <label for="min-year">Ano mínimo desejado</label>
+                            <input type="number" id="min-year" class="form-control" min="1990" max="2023"
+                                placeholder="Ex: 2018">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-category">Categoria</label>
+                            <select id="car-category" class="form-control">
+                                <option value="">Selecione a categoria</option>
+                                <option value="popular">Popular</option>
+                                <option value="intermediate">Intermediário</option>
+                                <option value="executive">Executivo</option>
+                                <option value="luxury">Luxo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-brand">Marca desejada</label>
+                            <select id="car-brand" class="form-control">
+                                <option value="">Selecione a marca</option>
+                                <option value="volkswagen">Volkswagen</option>
+                                <option value="chevrolet">Chevrolet</option>
+                                <option value="fiat">Fiat</option>
+                                <option value="ford">Ford</option>
+                                <option value="toyota">Toyota</option>
+                                <option value="honda">Honda</option>
+                                <option value="hyundai">Hyundai</option>
+                                <option value="renault">Renault</option>
+                                <option value="nissan">Nissan</option>
+                                <option value="indifferent">Indiferente</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="car-model">Modelo específico (se souber)</label>
+                            <input type="text" id="car-model" class="form-control"
+                                placeholder="Ex: Onix, Corolla, HB20">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Opcionais/Preferências (marque os que deseja)</label>
+                            <div>
+                                <input type="checkbox" id="option-blindado" name="options" value="blindado">
+                                <label for="option-blindado">Blindado</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-automatico" name="options" value="automatico">
+                                <label for="option-automatico">Automático</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-air" name="options" value="ar-condicionado">
+                                <label for="option-air">Ar-condicionado</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-multimidia" name="options" value="multimidia">
+                                <label for="option-multimidia">Multimídia</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-couro" name="options" value="bancos-couro">
+                                <label for="option-couro">Bancos de couro</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-teto-solar" name="options" value="teto-solar">
+                                <label for="option-teto-solar">Teto solar</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="option-turbo" name="options" value="motor-turbo">
+                                <label for="option-turbo">Motor turbo</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="primary-use">Uso principal do carro</label>
+                            <select id="primary-use" class="form-control">
+                                <option value="">Selecione o uso principal</option>
+                                <option value="city">Cidade</option>
+                                <option value="travel">Viagem/Estrada</option>
+                                <option value="work">Trabalho (carga/pickup)</option>
+                                <option value="leisure">Lazer/Esportivo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estimated-value">Valor estimado do carro (R$)</label>
+                            <input type="text" id="estimated-value" class="form-control" placeholder="Ex: 75000">
+                            <small>Deixe em branco se não souber o valor</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="purchase-time">Prazo ideal para compra</label>
+                            <select id="purchase-time" class="form-control">
+                                <option value="immediate">Imediato</option>
+                                <option value="3months">Até 3 meses</option>
+                                <option value="6months">6 meses</option>
+                                <option value="1year">1 ano ou mais</option>
+                            </select>
+                        </div>
+
+                        <div class="navigation-buttons">
+                            <button id="prev-step-btn" class="cta-button btn-prev">Voltar</button>
+                            <button id="simulate-btn" class="cta-button btn-next">Calcular Simulação</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Page -->
+    <section id="results" class="page">
+        <div class="full-screen results">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Resultado da Simulação</h2>
+                    <p>Análise baseada em seus dados e nas melhores opções do mercado</p>
+                </div>
+
+                <!-- Resultado para pagamento à vista -->
+                <div id="cash-result">
+                    <div class="dashboard">
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-money-bill-wave"></i> Resumo do Pagamento à Vista</h3>
+                            <div class="financial-data">
+                                <div class="data-row">
+                                    <span class="data-label">Valor total do veículo:</span>
+                                    <span class="data-value" id="cash-total">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Possível desconto:</span>
+                                    <span class="data-value" id="cash-discount">R$ 0,00</span>
+                                </div>
+                                <div class="data-row" id="tradein-section" style="display: none;">
+                                    <span class="data-label">Valor de troca:</span>
+                                    <span class="data-value" id="tradein-value">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Valor final:</span>
+                                    <span class="data-value highlight" id="cash-final">R$ 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-car"></i> Carro Sugerido</h3>
+                            <div class="financial-data">
+                                <div class="data-row">
+                                    <span class="data-label">Modelo:</span>
+                                    <span class="data-value" id="result-car-model">-</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Preço:</span>
+                                    <span class="data-value" id="result-car-price">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Opcionais:</span>
+                                    <span class="data-value" id="result-car-options">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultado para financiamento -->
+                <div id="financing-result" style="display: none;">
+                    <div class="dashboard">
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-chart-line"></i> Resumo do Financiamento</h3>
+                            <div class="financial-data">
+                                <div class="data-row">
+                                    <span class="data-label">Valor total do veículo:</span>
+                                    <span class="data-value" id="financing-total">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Entrada:</span>
+                                    <span class="data-value" id="financing-downpayment">R$ 0,00</span>
+                                </div>
+                                <div class="data-row" id="financing-tradein-section" style="display: none;">
+                                    <span class="data-label">Valor de troca:</span>
+                                    <span class="data-value" id="financing-tradein-value">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Valor financiado:</span>
+                                    <span class="data-value" id="financing-amount">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Parcelas:</span>
+                                    <span class="data-value" id="financing-installments">0x</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Valor da parcela:</span>
+                                    <span class="data-value highlight" id="financing-monthly">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Total a pagar:</span>
+                                    <span class="data-value" id="financing-totalpaid">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Juros totais:</span>
+                                    <span class="data-value" id="financing-interest">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Percentual:</span>
+                                    <span class="data-value" id="financing-percentage">0% financiado</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-car"></i> Carro Sugerido</h3>
+                            <div class="financial-data">
+                                <div class="data-row">
+                                    <span class="data-label">Modelo:</span>
+                                    <span class="data-value" id="financing-car-model">-</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Preço:</span>
+                                    <span class="data-value" id="financing-car-price">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Opcionais:</span>
+                                    <span class="data-value" id="financing-car-options">-</span>
+                                </div>
+                            </div>
+
+                            <h3><i class="fas fa-chart-pie"></i> Composição do Financiamento</h3>
+                            <div class="chart-container">
+                                <canvas id="financingChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard">
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-chart-bar"></i> Comparação Mensal</h3>
+                            <div class="chart-container">
+                                <canvas id="comparisonChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-check-circle"></i> Recomendação</h3>
+                            <p id="recommendation-text">Com base na sua renda e perfil, a troca é vantajosa
+                                financeiramente.</p>
+                            <div class="financial-data">
+                                <div class="data-row">
+                                    <span class="data-label">Economia mensal estimada:</span>
+                                    <span class="data-value highlight" id="monthly-savings">R$ 0,00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Prazo ideal para compra:</span>
+                                    <span class="data-value" id="ideal-purchase-time">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    <div class="charts-container">
+        <!-- Gráfico 1: Comparação de Preços -->
+        <div class="chart-card">
+            <div class="chart-title">COMPARAÇÃO DE PREÇOS</div>
+            <div class="chart-wrapper">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Custo Total 5 Anos -->
+        <div class="chart-card">
+            <div class="chart-title">CUSTO TOTAL (5 ANOS)</div>
+            <div class="chart-wrapper">
+                <canvas id="costChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 3: Manutenção Anual -->
+        <div class="chart-card">
+            <div class="chart-title">MANUTENÇÃO ANUAL</div>
+            <div class="chart-wrapper">
+                <canvas id="maintenanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 4: Desvalorização -->
+        <div class="chart-card">
+            <div class="chart-title">DESVALORIZAÇÃO EM 3 ANOS</div>
+            <div class="chart-wrapper">
+                <canvas id="depreciationChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Gráfico 1: Comparação de Preços
+        const priceCtx = document.getElementById('priceChart').getContext('2d');
+        new Chart(priceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Sugerido', 'Opção B', 'Opção C', 'Opção D'],
+                datasets: [{
+                    label: 'Preço (R$)',
+                    data: [125990, 142500, 138000, 131750],
+                    backgroundColor: [
+                        'rgba(52, 152, 219, 0.8)',
+                        'rgba(149, 165, 166, 0.6)',
+                        'rgba(149, 165, 166, 0.6)',
+                        'rgba(149, 165, 166, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(52, 152, 219, 1)',
+                        'rgba(149, 165, 166, 1)',
+                        'rgba(149, 165, 166, 1)',
+                        'rgba(149, 165, 166, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'R$ ' + context.parsed.y.toLocaleString('pt-BR');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + (value / 1000).toFixed(0) + ' mil';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico 2: Custo Total 5 Anos
+        const costCtx = document.getElementById('costChart').getContext('2d');
+        new Chart(costCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Sugerido', 'Opção B', 'Opção C'],
+                datasets: [{
+                    label: 'Custo Total (R$)',
+                    data: [185000, 210000, 195000],
+                    backgroundColor: [
+                        'rgba(46, 204, 113, 0.8)',
+                        'rgba(149, 165, 166, 0.6)',
+                        'rgba(149, 165, 166, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(149, 165, 166, 1)',
+                        'rgba(149, 165, 166, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + (value / 1000).toFixed(0) + ' mil';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico 3: Manutenção Anual
+        const maintenanceCtx = document.getElementById('maintenanceChart').getContext('2d');
+        new Chart(maintenanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['1º Ano', '2º Ano', '3º Ano', '4º Ano', '5º Ano'],
+                datasets: [{
+                    label: 'Sugerido',
+                    data: [1200, 1500, 1800, 2200, 2500],
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Média Mercado',
+                    data: [1500, 1900, 2300, 2800, 3200],
+                    borderColor: 'rgba(149, 165, 166, 1)',
+                    backgroundColor: 'rgba(149, 165, 166, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    borderDash: [5, 5]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico 4: Desvalorização
+        const depreciationCtx = document.getElementById('depreciationChart').getContext('2d');
+        new Chart(depreciationCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Valor Residual', 'Desvalorização'],
+                datasets: [{
+                    data: [65, 35],
+                    backgroundColor: [
+                        'rgba(46, 204, 113, 0.8)',
+                        'rgba(231, 76, 60, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(46, 204, 113, 1)',
+                        'rgba(231, 76, 60, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    </script>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="cta-button" data-page="questionnaire">Nova Simulação</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Page -->
+    <section id="about" class="page">
+        <div class="full-screen about">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Sobre Nós</h2>
+                    <p>Conheça nossa missão, visão e equipe especializada</p>
+                </div>
+
+                <div class="about-mission">
+                    <h3>Nossa Missão</h3>
+                    <p>Oferecer simulações precisas e transparentes para auxiliar nossos clientes na tomada de decisão
+                        sobre troca de veículos, utilizando tecnologia avançada e dados em tempo real do mercado
+                        automotivo.</p>
+                </div>
+
+                <div class="team-container">
+                    <div class="team-member">
+                        <div class="member-photo">
+                            <i class="fas fa-user" style="font-size: 80px; line-height: 160px; color: #d9d9d9;"></i>
+                        </div>
+                        <h4 class="member-name">Ycaro Campovilla</h4>
+                        <p class="member-role">Especialista Financeiro</p>
+                        <p class="member-description">Especialista em análise financeira com mais de 10 anos de
+                            experiência no mercado automotivo.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="member-photo">
+                            <i class="fas fa-user" style="font-size: 80px; line-height: 160px; color: #d9d9d9;"></i>
+                        </div>
+                        <h4 class="member-name">Enzo</h4>
+                        <p class="member-role">Analista de Dados</p>
+                        <p class="member-description">Especialista em big data e análise de tendências do mercado
+                            automotivo.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-medium"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="member-photo">
+                            <i class="fas fa-user" style="font-size: 80px; line-height: 160px; color: #d9d9d9;"></i>
+                        </div>
+                        <h4 class="member-name">Enrico</h4>
+                        <p class="member-role">Consultor Automotivo</p>
+                        <p class="member-description">Consultor especializado em avaliação de veículos e negociação.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3>AutoSimulate</h3>
+                        <p>Soluções inteligentes para simulação de troca de veículos com base em dados financeiros e análise
+                            de mercado.</p>
+                        <div class="social-icons">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Links Rápidos</h3>
+                        <a href="#" data-page="home">Home</a>
+                        <a href="#" data-page="questionnaire">Simulação</a>
+                        <a href="#" data-page="results">Resultados</a>
+                        <a href="#" data-page="about">Sobre Nós</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Contato</h3>
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Av. Paulista, 1000, São Paulo - SP</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>(11) 3000-1000</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>contato@autosimulate.com.br</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Newsletter</h3>
+                        <p>Inscreva-se para receber novidades e dicas sobre o mercado automotivo.</p>
+                        <div class="newsletter-form">
+                            <input type="email" class="newsletter-input" placeholder="Seu e-mail">
+                            <button class="newsletter-btn">Inscrever</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="copyright">
+                    <p>&copy; 2023 AutoSimulate - Todos os direitos reservados</p>
+                    <div class="footer-links">
+                        <a href="#">Política de Privacidade</a>
+                        <a href="#">Termos de Uso</a>
+                        <a href="#">Cookies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Variáveis globais
+            let currentStep = 1;
+
+            // Elementos da navegação
+            const nextStepBtn = document.getElementById('next-step-btn');
+            const prevStepBtn = document.getElementById('prev-step-btn');
+            const simulateBtn = document.getElementById('simulate-btn');
+            const step1Content = document.getElementById('step1-content');
+            const step2Content = document.getElementById('step2-content');
+            const steps = document.querySelectorAll('.step');
+
+            // Configurar eventos de navegação
+            if (nextStepBtn) {
+                nextStepBtn.addEventListener('click', function () {
+                    if (validateStep1()) {
+                        goToStep(2);
+                    }
+                });
+            }
+
+            if (prevStepBtn) {
+                prevStepBtn.addEventListener('click', function () {
+                    goToStep(1);
+                });
+            }
+
+            if (simulateBtn) {
+                simulateBtn.addEventListener('click', function () {
+                    if (validateStep2()) {
+                        calculateSimulation();
+                        // Ir para a página de resultados
+                        document.getElementById('questionnaire').classList.remove('active');
+                        document.getElementById('results').classList.add('active');
+                        window.scrollTo(0, 0);
+                    }
+                });
+            }
+
+            // Função para navegar entre as etapas
+            function goToStep(step) {
+                // Esconder todos os conteúdos de etapa
+                step1Content.style.display = 'none';
+                step2Content.style.display = 'none';
+
+                // Remover classe ativa de todos os indicadores
+                steps.forEach(s => s.classList.remove('active'));
+
+                // Mostrar conteúdo da etapa atual e atualizar indicador
+                if (step === 1) {
+                    step1Content.style.display = 'block';
+                    document.querySelector('.step[data-step="1"]').classList.add('active');
+                    currentStep = 1;
+                } else if (step === 2) {
+                    step2Content.style.display = 'block';
+                    document.querySelector('.step[data-step="2"]').classList.add('active');
+                    currentStep = 2;
+                }
+            }
+
+            // Validação da Etapa 1
+            function validateStep1() {
+                const paymentMethod = document.getElementById('payment-method').value;
+
+                if (!paymentMethod) {
+                    alert('Por favor, selecione a forma de pagamento.');
+                    return false;
+                }
+
+                // Validações adicionais para financiamento
+                if (paymentMethod === 'financing') {
+                    const giveDownpayment = document.getElementById('give-downpayment').value;
+
+                    if (giveDownpayment === 'yes') {
+                        const downpaymentValue = document.getElementById('downpayment-value').value;
+                        if (!downpaymentValue || isNaN(downpaymentValue) || parseFloat(downpaymentValue) <= 0) {
+                            alert('Por favor, informe um valor válido para a entrada.');
+                            return false;
+                        }
+                    }
+
+                    const monthlyPayment = document.getElementById('monthly-payment').value;
+                    if (!monthlyPayment || isNaN(monthlyPayment) || parseFloat(monthlyPayment) <= 0) {
+                        alert('Por favor, informe um valor válido para a parcela mensal.');
+                        return false;
+                    }
+                }
+
+                // Validações para quem possui carro
+                const hasCar = document.getElementById('has-car').value;
+                if (hasCar === 'yes') {
+                    const carPaid = document.getElementById('car-paid').value;
+                    if (carPaid === 'no') {
+                        const remainingDebt = document.getElementById('remaining-debt').value;
+                        if (!remainingDebt || isNaN(remainingDebt) || parseFloat(remainingDebt) <= 0) {
+                            alert('Por favor, informe um valor válido para o valor que falta quitar.');
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            // Validação da Etapa 2
+            function validateStep2() {
+                const carType = document.getElementById('car-type').value;
+                const carCondition = document.getElementById('car-condition').value;
+                const carCategory = document.getElementById('car-category').value;
+                const carBrand = document.getElementById('car-brand').value;
+                const primaryUse = document.getElementById('primary-use').value;
+                const purchaseTime = document.getElementById('purchase-time').value;
+
+                if (!carType || !carCondition || !carCategory || !carBrand || !primaryUse || !purchaseTime) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return false;
+                }
+
+                // Validação adicional para carro usado
+                if (carCondition === 'used') {
+                    const minYear = document.getElementById('min-year').value;
+                    if (!minYear || isNaN(minYear) || parseInt(minYear) < 1990 || parseInt(minYear) > new Date().getFullYear()) {
+                        alert('Por favor, informe um ano válido para o carro usado.');
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // Configurar interações dinâmicas na Etapa 1
+            const paymentMethod = document.getElementById('payment-method');
+            const hasCar = document.getElementById('has-car');
+            const carPaid = document.getElementById('car-paid');
+
+            if (paymentMethod) {
+                paymentMethod.addEventListener('change', function () {
+                    const financingFields = document.getElementById('financing-fields');
+                    if (this.value === 'financing') {
+                        financingFields.style.display = 'block';
+                    } else {
+                        financingFields.style.display = 'none';
+                    }
+                });
+            }
+
+            if (hasCar) {
+                hasCar.addEventListener('change', function () {
+                    const carPaidGroup = document.getElementById('car-paid-group');
+                    if (this.value === 'yes') {
+                        carPaidGroup.style.display = 'block';
+                    } else {
+                        carPaidGroup.style.display = 'none';
+                        document.getElementById('remaining-debt-group').style.display = 'none';
+                    }
+                });
+            }
+
+            if (carPaid) {
+                carPaid.addEventListener('change', function () {
+                    const remainingDebtGroup = document.getElementById('remaining-debt-group');
+                    if (this.value === 'no') {
+                        remainingDebtGroup.style.display = 'block';
+                    } else {
+                        remainingDebtGroup.style.display = 'none';
+                    }
+                });
+            }
+
+            // Configurar interações dinâmicas na Etapa 2
+            const carCondition = document.getElementById('car-condition');
+            if (carCondition) {
+                carCondition.addEventListener('change', function () {
+                    const minYearGroup = document.getElementById('min-year-group');
+                    if (this.value === 'used') {
+                        minYearGroup.style.display = 'block';
+                    } else {
+                        minYearGroup.style.display = 'none';
+                    }
+                });
+            }
+
+            // Configurar campo de entrada para financiamento
+            const giveDownpayment = document.getElementById('give-downpayment');
+            if (giveDownpayment) {
+                giveDownpayment.addEventListener('change', function () {
+                    const downpaymentField = document.getElementById('downpayment-field');
+                    if (this.value === 'yes') {
+                        downpaymentField.style.display = 'block';
+                    } else {
+                        downpaymentField.style.display = 'none';
+                    }
+                });
+            }
+
+            // Navegação entre páginas principais
+            const navLinks = document.querySelectorAll('.nav-links a, .cta-button');
+            const pages = document.querySelectorAll('.page');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetPage = this.getAttribute('data-page');
+
+                    if (targetPage) {
+                        pages.forEach(page => {
+                            page.classList.remove('active');
+                        });
+
+                        document.getElementById(targetPage).classList.add('active');
+                        window.scrollTo(0, 0);
+
+                        // Se for para o questionário, resetar para a primeira etapa
+                        if (targetPage === 'questionnaire') {
+                            goToStep(1);
+                        }
+                    }
+                });
+            });
+
+            // Função de simulação (exemplo)
+            function calculateSimulation() {
+                // Aqui viria a lógica de cálculo da simulação
+                console.log('Simulação calculada!');
+
+                // Exemplo de preenchimento dos resultados
+                document.getElementById('cash-total').textContent = 'R$ 75.000,00';
+                document.getElementById('cash-discount').textContent = 'R$ 3.750,00';
+                document.getElementById('cash-final').textContent = 'R$ 71.250,00';
+                document.getElementById('result-car-model').textContent = 'Volkswagen Golf 2023';
+                document.getElementById('result-car-price').textContent = 'R$ 75.000,00';
+                document.getElementById('result-car-options').textContent = 'Automático, Ar-condicionado, Multimídia';
+
+                document.getElementById('financing-total').textContent = 'R$ 75.000,00';
+                document.getElementById('financing-downpayment').textContent = 'R$ 15.000,00';
+                document.getElementById('financing-amount').textContent = 'R$ 60.000,00';
+                document.getElementById('financing-installments').textContent = '48x';
+                document.getElementById('financing-monthly').textContent = 'R$ 1.450,00';
+                document.getElementById('financing-totalpaid').textContent = 'R$ 84.600,00';
+                document.getElementById('financing-interest').textContent = 'R$ 9.600,00';
+                document.getElementById('financing-percentage').textContent = '80% financiado, 20% entrada';
+                document.getElementById('financing-car-model').textContent = 'Volkswagen Golf 2023';
+                document.getElementById('financing-car-price').textContent = 'R$ 75.000,00';
+                document.getElementById('financing-car-options').textContent = 'Automático, Ar-condicionado, Multimídia';
+                document.getElementById('monthly-savings').textContent = 'R$ 250,00';
+                document.getElementById('ideal-purchase-time').textContent = '3 meses';
+
+                // Mostrar o resultado correto baseado no tipo de pagamento
+                const paymentMethod = document.getElementById('payment-method').value;
+                if (paymentMethod === 'cash') {
+                    document.getElementById('cash-result').style.display = 'block';
+                    document.getElementById('financing-result').style.display = 'none';
+                } else {
+                    document.getElementById('cash-result').style.display = 'none';
+                    document.getElementById('financing-result').style.display = 'block';
+
+                    // Criar gráficos
+                    createCharts();
+                }
+            }
+
+            // Criar gráficos para financiamento
+            function createCharts() {
+                // Gráfico de composição do financiamento
+                const financingCtx = document.getElementById('financingChart');
+                if (financingCtx) {
+                    new Chart(financingCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Valor do Veículo', 'Juros'],
+                            datasets: [{
+                                data: [75000, 9600],
+                                backgroundColor: ['#ff2800', '#d9d9d9'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: '#d9d9d9',
+                                        font: { size: 12 }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Gráfico de comparação de parcelas
+                const comparisonCtx = document.getElementById('comparisonChart');
+                if (comparisonCtx) {
+                    new Chart(comparisonCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Parcela Atual', 'Nova Parcela'],
+                            datasets: [{
+                                label: 'Valor da Parcela (R$)',
+                                data: [1700, 1450],
+                                backgroundColor: ['#d9d9d9', '#ff2800'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { color: '#d9d9d9' },
+                                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                                },
+                                x: {
+                                    ticks: { color: '#d9d9d9' },
+                                    grid: { display: false }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

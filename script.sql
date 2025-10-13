@@ -1,12 +1,6 @@
--- Cria DataBase
-
 Create Database if Not exists AutoSimula DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_0900_ai_ci;
 
--- Usa DataBase
-
 use AutoSimula;
-
--- Cria Tabelas
 
 CREATE TABLE Carros (
     id_carro INT AUTO_INCREMENT PRIMARY KEY,
