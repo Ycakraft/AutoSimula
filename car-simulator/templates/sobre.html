@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre - CarMatch{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sobre-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 80px 20px;
+        background: var(--background-color);
+    }
+
+    .sobre-card {
+        background: var(--surface-color);
+        border-radius: 18px;
+        padding: 64px 56px;
+        max-width: 980px;
+        box-shadow: 0 4px 16px var(--shadow-light);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        animation: fadeIn 0.8s ease;
+    }
+
+    .sobre-card h1 {
+        color:rgb(111, 111, 111);
+        font-size: 48px;
+        font-weight: 600;
+        margin-bottom: 32px;
+        text-align: center;
+        letter-spacing: -0.003em;
+        line-height: 1.08349;
+    }
+
+    .sobre-card h2 {
+        color:rgb(111, 111, 111);
+        font-size: 32px;
+        font-weight: 600;
+        margin-top: 48px;
+        margin-bottom: 16px;
+        letter-spacing: -0.005em;
+        line-height: 1.125;
+    }
+
+    .sobre-card p {
+        color: var(--text-secondary);
+        line-height: 1.47059;
+        font-size: 17px;
+        font-weight: 400;
+        margin-bottom: 20px;
+        letter-spacing: -0.022em;
+    }
+
+    .sobre-card p strong {
+        color: rgb(111, 111, 111);
+        font-weight: 600;
+    }
+
+    .team {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+        justify-content: center;
+        margin-top: 48px;
+    }
+
+    .team-member {
+        background: #f5f5f7;
+        border-radius: 18px;
+        padding: 32px 24px;
+        text-align: center;
+        flex: 1;
+        min-width: 200px;
+        max-width: 280px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        transition: var(--transition);
+    }
+
+    .team-member:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px var(--shadow-light);
+    }
+
+    .team-member .avatar {
+        font-size: 64px;
+        margin-bottom: 20px;
+        filter: grayscale(20%);
+    }
+
+    .team-member h3 {
+        color: rgb(111, 111, 111);
+        font-size: 19px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        letter-spacing: -0.01em;
+    }
+
+    .team-member p {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    .mission {
+        background: #f5f5f7;
+        color: var(--text-color);
+        padding: 40px 48px;
+        border-radius: 18px;
+        margin: 40px 0;
+        text-align: center;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .mission h2 {
+        color: rgb(111, 111, 111);
+        margin-top: 0;
+        font-size: 28px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+
+    .mission p {
+        color: var(--text-secondary);
+        font-size: 19px;
+        line-height: 1.42105;
+        letter-spacing: 0.012em;
+    }
+
+    .btn-container {
+        text-align: center;
+        margin-top: 48px;
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 1068px) {
+        .sobre-card {
+            padding: 48px 40px;
+        }
+
+        .sobre-card h1 {
+            font-size: 40px;
+        }
+
+        .sobre-card h2 {
+            font-size: 28px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .sobre-container {
+            padding: 60px 20px;
+        }
+
+        .sobre-card {
+            padding: 40px 28px;
+        }
+
+        .sobre-card h1 {
+            font-size: 32px;
+        }
+
+        .sobre-card h2 {
+            font-size: 24px;
+            margin-top: 32px;
+        }
+
+        .sobre-card p {
+            font-size: 15px;
+        }
+
+        .team {
+            flex-direction: column;
+        }
+
+        .team-member {
+            max-width: 100%;
+        }
+
+        .mission {
+            padding: 32px 24px;
+        }
+
+        .mission h2 {
+            font-size: 24px;
+        }
+
+        .mission p {
+            font-size: 17px;
+        }
+
+        .btn-container {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-container .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .sobre-card h1 {
+            font-size: 28px;
+        }
+
+        .sobre-card h2 {
+            font-size: 21px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sobre-container">
+    <div class="sobre-card">
+        <h1>Sobre o CarMatch </h1>
+
+        <div class="mission">
+            <h2>Nossa Missão</h2>
+            <p>
+                Ajudamos você a comparar e escolher o carro certo com base em dados reais, 
+                simulando custos e vantagens de forma transparente e personalizada.
+            </p>
+        </div>
+
+        <h2>O que fazemos?</h2>
+        <p>
+            O CarMatch é uma plataforma inteligente que analisa suas preferências, situação financeira 
+            e necessidades para recomendar os melhores carros disponíveis no mercado. Utilizamos dados 
+            reais e algoritmos de comparação para garantir que você tome a melhor decisão.
+        </p>
+
+        <h2>Como funciona?</h2>
+        <p>
+            <strong>1. Responda perguntas simples:</strong> Conte-nos sobre sua situação atual, 
+            preferências e orçamento.<br><br>
+            <strong>2. Análise inteligente:</strong> Nosso sistema processa milhares de opções 
+            e filtra os carros que melhor se encaixam no seu perfil.<br><br>
+            <strong>3. Receba recomendações:</strong> Veja os 3 melhores carros para você, 
+            com simulações financeiras detalhadas e comparações lado a lado.
+        </p>
+
+        <h2>Nossa Equipe</h2>
+        <div class="team">
+            <div class="team-member">
+                <div class="avatar">👨‍💻</div>
+                <h3>AutoMatch AI</h3>
+                <p>Tecnologia & Inovação</p>
+            </div>
+            <div class="team-member">
+                <div class="avatar">📊</div>
+                <h3>Data Analytics</h3>
+                <p>Análise de Mercado</p>
+            </div>
+            <div class="team-member">
+                <div class="avatar">🎨</div>
+                <h3>Design Team</h3>
+                <p>Experiência do Usuário</p>
+            </div>
+        </div>
+
+        <h2>Por que confiar no CarMatch?</h2>
+        <p>
+            ✅ <strong>Dados reais:</strong> Trabalhamos com informações atualizadas do mercado<br>
+            ✅ <strong>Transparência:</strong> Todos os cálculos são explicados claramente<br>
+            ✅ <strong>Personalização:</strong> Cada recomendação é única para você<br>
+            ✅ <strong>Gratuito:</strong> 100% gratuito, sem taxas ocultas
+        </p>
+
+        <div class="btn-container">
+            <a href="/" class="btn btn-secondary">Voltar à Página Inicial</a>
+            <a href="/simulacao" class="btn" style="margin-left: 15px;">Fazer Simulação</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

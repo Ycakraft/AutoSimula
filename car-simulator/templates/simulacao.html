@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+
+{% block title %}Simulação - CarMatch{% endblock %}
+
+{% block extra_css %}
+<style>
+    .simulacao-container {
+        display: flex;
+        justify-content: center;
+        padding: 80px 20px;
+        background: var(--background-color);
+    }
+
+    .form-card {
+        background: var(--surface-color);
+        border-radius: 18px;
+        padding: 56px 48px;
+        max-width: 780px;
+        width: 100%;
+        box-shadow: 0 4px 16px var(--shadow-light);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        animation: fadeIn 0.8s ease;
+    }
+
+    .form-card h1 {
+        color: var(--text-color);
+        font-size: 40px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        text-align: center;
+        letter-spacing: -0.003em;
+        line-height: 1.1;
+    }
+
+    .form-card .subtitle {
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 17px;
+        line-height: 1.47059;
+        letter-spacing: -0.022em;
+        font-weight: 400;
+    }
+
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .form-group label {
+        display: block;
+        color: var(--text-color);
+        font-weight: 600;
+        margin-bottom: 12px;
+        font-size: 17px;
+        letter-spacing: -0.022em;
+        line-height: 1.47059;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 17px;
+        transition: var(--transition);
+        font-family: inherit;
+        background: var(--surface-color);
+        color: var(--text-color);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .radio-option {
+        flex: 1;
+        min-width: 140px;
+    }
+
+    .radio-option input[type="radio"] {
+        display: none;
+    }
+
+    .radio-option label {
+        display: block;
+        padding: 14px 20px;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 400;
+        font-size: 17px;
+        color: var(--text-color);
+        letter-spacing: -0.022em;
+    }
+
+    .radio-option input[type="radio"]:checked + label {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .radio-option label:hover {
+        border-color: var(--primary-color);
+        transform: scale(1.02);
+    }
+
+    .conditional-field {
+        display: none;
+        animation: slideDown 0.4s ease;
+    }
+
+    .conditional-field.active {
+        display: block;
+    }
+
+    .progress-bar {
+        height: 4px;
+        background: var(--border-color);
+        border-radius: 10px;
+        margin-bottom: 40px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .btn-submit {
+        width: 50%;
+        padding: 14px;
+         font-size: 12px;
+        font-weight: 200;
+        margin-top: 32px;
+        border-radius: 14px;
+        display: center ;
+        flex: 1;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+        }
+        to {
+            opacity: 1;
+            max-height: 500px;
+        }
+    }
+
+    @media (max-width: 1068px) {
+        .form-card {
+            padding: 48px 40px;
+        }
+
+        .form-card h1 {
+            font-size: 36px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .simulacao-container {
+            padding: 60px 20px;
+        }
+
+        .form-card {
+            padding: 40px 28px;
+        }
+
+        .form-card h1 {
+            font-size: 32px;
+        }
+
+        .form-card .subtitle {
+            font-size: 15px;
+        }
+
+        .radio-group {
+            flex-direction: column;
+        }
+
+        .radio-option {
+            min-width: 100%;
+        }
+
+        .form-group label {
+            font-size: 15px;
+        }
+
+        .form-group input,
+        .form-group select {
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .form-card h1 {
+            font-size: 28px;
+        }
+
+        .form-card .subtitle {
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="simulacao-container">
+    <div class="form-card">
+        <h1>Simulação Personalizada </h1>
+        <p class="subtitle">Responda as perguntas abaixo para encontrarmos o carro ideal para você</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <form method="POST" id="simulacaoForm">
+            <!-- Pergunta 1: Possui carro? -->
+            <div class="form-group">
+                <label>1. Você possui carro atualmente?</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="possui_sim" name="possui_carro" value="sim" required>
+                        <label for="possui_sim">Sim</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="possui_nao" name="possui_carro" value="nao">
+                        <label for="possui_nao">Não</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos condicionais se possui carro -->
+            <div id="campos_possui_carro" class="conditional-field">
+                <div class="form-group">
+                    <label>Seu carro já está quitado?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="quitado_sim" name="carro_quitado" value="sim">
+                            <label for="quitado_sim">Sim</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="quitado_nao" name="carro_quitado" value="nao">
+                            <label for="quitado_nao">Não</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="campo_valor_restante" class="conditional-field">
+                    <div class="form-group">
+                        <label>Quanto falta pagar? (R$)</label>
+                        <input type="number" name="valor_restante" placeholder="Ex: 15000" min="0" step="100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Qual é o modelo e ano do seu carro atual?</label>
+                    <input type="text" name="modelo_atual" placeholder="Ex: Gol 2018">
+                </div>
+            </div>
+
+            <!-- Pergunta 2: Forma de pagamento -->
+            <div class="form-group">
+                <label>2. Como pretende pagar o próximo carro?</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="pag_vista" name="forma_pagamento" value="vista" required>
+                        <label for="pag_vista">À Vista</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="pag_financiado" name="forma_pagamento" value="financiado">
+                        <label for="pag_financiado">Financiado</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos condicionais para financiamento -->
+            <div id="campos_financiamento" class="conditional-field">
+                <div class="form-group">
+                    <label>Quanto pode pagar por parcela? (R$)</label>
+                    <input type="number" name="valor_parcela" placeholder="Ex: 1500" min="0" step="50">
+                </div>
+
+                <div class="form-group">
+                    <label>Em quantas parcelas? (meses)</label>
+                    <input type="number" name="num_parcelas" placeholder="Ex: 48" min="12" max="84" step="6">
+                </div>
+            </div>
+
+            <!-- Campos condicionais para à vista -->
+            <div id="campos_vista" class="conditional-field">
+                <div class="form-group">
+                    <label>Qual é o valor máximo que pode investir? (R$)</label>
+                    <input type="number" name="valor_vista" placeholder="Ex: 50000" min="0" step="1000">
+                </div>
+            </div>
+
+            <!-- Pergunta 3: Tipo de carro -->
+            <div class="form-group">
+                <label>3. Qual tipo de carro prefere?</label>
+                <select name="tipo_carro" required>
+                    <option value="">Selecione...</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Hatch">Hatch</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Picape">Picape</option>
+                    <option value="Esportivo">Esportivo</option>
+                </select>
+            </div>
+
+            <!-- Pergunta 4: Prioridade -->
+            <div class="form-group">
+                <label>4. Qual prioridade é mais importante para você?</label>
+                <select name="prioridade" required>
+                    <option value="">Selecione...</option>
+                    <option value="economia">Economia de combustível</option>
+                    <option value="conforto">Conforto e tecnologia</option>
+                    <option value="potencia">Potência / Desempenho</option>
+                    <option value="espaco">Espaço interno</option>
+                    <option value="preco">Preço mais acessível</option>
+                </select>
+            </div>
+
+          
+
+            <!-- Pergunta 6: Câmbio -->
+            <div class="form-group">
+                <label>5. Quer câmbio manual ou automático?</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="cambio_manual" name="cambio" value="Manual" required>
+                        <label for="cambio_manual">Manual</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="cambio_auto" name="cambio" value="Automático">
+                        <label for="cambio_auto">Automático</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="cambio_tanto" name="cambio" value="">
+                        <label for="cambio_tanto">Tanto faz</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pergunta 7: Tipo de motor -->
+            <div class="form-group">
+                <label>6. Prefere motor a combustão, híbrido ou 100% elétrico?</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="motor_combustao" name="tipo_motor" value="Combustão" required>
+                        <label for="motor_combustao">Combustão</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="motor_hibrido" name="tipo_motor" value="Híbrido">
+                        <label for="motor_hibrido">Híbrido</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="motor_eletrico" name="tipo_motor" value="Elétrico">
+                        <label for="motor_eletrico">Elétrico</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-submit">Ver Resultados </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Lógica para campos condicionais
+    const possuiCarroRadios = document.querySelectorAll('input[name="possui_carro"]');
+    const camposPossuiCarro = document.getElementById('campos_possui_carro');
+    
+    const carroQuitadoRadios = document.querySelectorAll('input[name="carro_quitado"]');
+    const campoValorRestante = document.getElementById('campo_valor_restante');
+    
+    const formaPagamentoRadios = document.querySelectorAll('input[name="forma_pagamento"]');
+    const camposFinanciamento = document.getElementById('campos_financiamento');
+    const camposVista = document.getElementById('campos_vista');
+
+    // Mostrar/ocultar campos de quem possui carro
+    possuiCarroRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'sim') {
+                camposPossuiCarro.classList.add('active');
+            } else {
+                camposPossuiCarro.classList.remove('active');
+                campoValorRestante.classList.remove('active');
+            }
+            updateProgress();
+        });
+    });
+
+    // Mostrar/ocultar campo de valor restante
+    carroQuitadoRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'nao') {
+                campoValorRestante.classList.add('active');
+            } else {
+                campoValorRestante.classList.remove('active');
+            }
+            updateProgress();
+        });
+    });
+
+    // Mostrar/ocultar campos de pagamento
+    formaPagamentoRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'financiado') {
+                camposFinanciamento.classList.add('active');
+                camposVista.classList.remove('active');
+            } else if (this.value === 'vista') {
+                camposVista.classList.add('active');
+                camposFinanciamento.classList.remove('active');
+            }
+            updateProgress();
+        });
+    });
+
+    // Atualizar barra de progresso
+    function updateProgress() {
+        const form = document.getElementById('simulacaoForm');
+        const requiredFields = form.querySelectorAll('[required]');
+        let filled = 0;
+        
+        requiredFields.forEach(field => {
+            if (field.type === 'radio') {
+                const radioGroup = form.querySelectorAll(`input[name="${field.name}"]`);
+                const checked = Array.from(radioGroup).some(r => r.checked);
+                if (checked) filled++;
+            } else if (field.value) {
+                filled++;
+            }
+        });
+        
+        const progress = (filled / requiredFields.length) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+    }
+
+    // Atualizar progresso ao preencher campos
+    document.querySelectorAll('input, select').forEach(field => {
+        field.addEventListener('change', updateProgress);
+        field.addEventListener('input', updateProgress);
+    });
+
+    // Validação do formulário
+    document.getElementById('simulacaoForm').addEventListener('submit', function(e) {
+        const formaPagamento = document.querySelector('input[name="forma_pagamento"]:checked');
+        
+        if (formaPagamento) {
+            if (formaPagamento.value === 'financiado') {
+                const valorParcela = document.querySelector('input[name="valor_parcela"]');
+                const numParcelas = document.querySelector('input[name="num_parcelas"]');
+                
+                if (!valorParcela.value || !numParcelas.value) {
+                    e.preventDefault();
+                    alert('Por favor, preencha o valor da parcela e o número de parcelas.');
+                    return false;
+                }
+            } else if (formaPagamento.value === 'vista') {
+                const valorVista = document.querySelector('input[name="valor_vista"]');
+                
+                if (!valorVista.value) {
+                    e.preventDefault();
+                    alert('Por favor, preencha o valor máximo que pode investir.');
+                    return false;
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
